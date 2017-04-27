@@ -109,7 +109,7 @@ main (int argc, char *argv[])
   clientApps.Start (Seconds (2.0));
   clientApps.Stop (Seconds (10.0));
 
-  Ipv4GlobalRoutingHelper::PopulateRoutingTables ();	//route
+//  Ipv4GlobalRoutingHelper::PopulateRoutingTables ();	//route
 
   //pointToPoint.EnablePcapAll ("second");
   //csma.EnablePcap ("second", csmaDevices.Get (1), true);
