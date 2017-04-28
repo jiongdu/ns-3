@@ -39,7 +39,7 @@ int
 main (int argc, char *argv[])
 {
   bool verbose = true;
-  uint32_t nCsma = 3;
+  int32_t nCsma = 4;
 
   CommandLine cmd;
   cmd.AddValue ("nCsma", "Number of \"extra\" CSMA nodes/devices", nCsma);
@@ -50,66 +50,81 @@ main (int argc, char *argv[])
   if (verbose)
     {
       LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_ALL);
-      LogComponentEnable ("UdpEchoClientApplication", LOG_PREFIX_ALL);
+      //LogComponentEnable ("UdpEchoClientApplication", LOG_PREFIX_ALL);
       
 	  LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_ALL);
-	  LogComponentEnable ("UdpEchoServerApplication", LOG_PREFIX_ALL);
+	  //LogComponentEnable ("UdpEchoServerApplication", LOG_PREFIX_ALL);
 
-      LogComponentEnable ("PointToPointHelper", LOG_LEVEL_INFO);
+	  //LogComponentEnable ("PointToPointNetDevice", LOG_LEVEL_ALL);
     }
 
   nCsma = nCsma == 0 ? 1 : nCsma;
 
-  NodeContainer p2pNodes;
-  p2pNodes.Create (2);
+  NodeContainer csmaNodes;				
+  csmaNodes.Create (nCsma);    			//create csmaNodes 
 
-  NodeContainer csmaNodes;
-  csmaNodes.Add (p2pNodes.Get (1));   
-  csmaNodes.Create (nCsma);    
-//pointTopoint
-  PointToPointHelper pointToPoint;
-  pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("5Mbps"));
-  pointToPoint.SetChannelAttribute ("Delay", StringValue ("2ms"));
-
-  NetDeviceContainer p2pDevices;
-  p2pDevices = pointToPoint.Install (p2pNodes);   //@return : NetDeviceContainer(contains two PointToPointNetDevice)
-//ethernet
+  /*
   CsmaHelper csma;
   csma.SetChannelAttribute ("DataRate", StringValue ("100Mbps"));
   csma.SetChannelAttribute ("Delay", TimeValue (NanoSeconds (6560)));
+  */
 
-  NetDeviceContainer csmaDevices;
-  csmaDevices = csma.Install (csmaNodes);	//@return : NetDeviceContainer(contains csmaNetDevices)
+  PointToPointHelper csma;
+  csma.SetDeviceAttribute ("DataRate", StringValue ("5Mbps"));
+  csma.SetChannelAttribute ("Delay", StringValue ("2ms"));
+
+  NetDeviceContainer global;
+
+  for(int i=0;i<3;i++){
+  	NodeContainer Nodes;
+	Nodes.Add(csmaNodes.Get(i));
+	Nodes.Add(csmaNodes.Get(3));
+	
+	NetDeviceContainer csmaDevices;
+	csmaDevices = csma.Install(Nodes);
+
+	Ptr<PointToPointNetDevice> csmaDev = DynamicCast<PointToPointNetDevice, NetDevice>(csmaDevices.Get(1));
+	//csmaDev->SetSwitchFlag(true);
+	global.Add(csmaDevices);
+  }
+  
+
 //add stack
   InternetStackHelper stack;
-  stack.Install (p2pNodes.Get (0));		
   stack.Install (csmaNodes);
 
   Ipv4AddressHelper address;
-  address.SetBase ("10.1.1.0", "255.255.255.0");	//SetBase(Ipv4Address network, Ipv4Mask mask, Ipv4Address base = "0.0.0.1");  start from 10.0.0.1
-  Ipv4InterfaceContainer p2pInterfaces;
-  p2pInterfaces = address.Assign (p2pDevices);		//Assign IP address to the net devices specified in the container based on the address set
 
-  address.SetBase ("10.1.2.0", "255.255.255.0");
+  address.SetBase ("10.1.1.0", "255.255.255.0");
   Ipv4InterfaceContainer csmaInterfaces;
-  csmaInterfaces = address.Assign (csmaDevices);	//Assign IP address to csmaDevices
+  csmaInterfaces = address.Assign (global);	//Assign IP address to csmaDevices
 
   UdpEchoServerHelper echoServer (9);   //port number
 
-  ApplicationContainer serverApps = echoServer.Install (csmaNodes.Get (nCsma));		//UdpEchoServer Application installed on csmaNodes[nCsma](the last node)
+  ApplicationContainer serverApps = echoServer.Install (csmaNodes.Get (2));		//UdpEchoServer Application installed on csmaNodes[nCsma](the last node)
   serverApps.Start (Seconds (1.0));
   serverApps.Stop (Seconds (10.0));
 
-  UdpEchoClientHelper echoClient (csmaInterfaces.GetAddress (nCsma), 9);  //remote ipaddress, port of UdpEchoServer
+  UdpEchoClientHelper echoClient (csmaInterfaces.GetAddress (4), 9);  //remote ipaddress, port of UdpEchoServer
   echoClient.SetAttribute ("MaxPackets", UintegerValue (1));
   echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));
-  echoClient.SetAttribute ("PacketSize", UintegerValue (10000));	//65535
+  echoClient.SetAttribute ("PacketSize", UintegerValue (1024));	//65535
 
-  ApplicationContainer clientApps = echoClient.Install (p2pNodes.Get (0));	//UdpEchoClient Application installed on p2pNodes[0](the first node)
-  clientApps.Start (Seconds (2.0));
-  clientApps.Stop (Seconds (10.0));
+//  ApplicationContainer clientApps = echoClient.Install (p2pNodes.Get (0));	//UdpEchoClient Application installed on p2pNodes[0](the first node)
+//  clientApps.Start (Seconds (2.0));
+//  clientApps.Stop (Seconds (10.0));
 
-//  Ipv4GlobalRoutingHelper::PopulateRoutingTables ();	//route
+//add UdpEchoClientApplication in csmaInterfaces
+
+  ApplicationContainer clientApps = echoClient.Install (csmaNodes.Get(0));
+  clientApps.Start (Seconds(2.0));
+  clientApps.Stop (Seconds(10.0));
+	
+  ApplicationContainer clientApps1 = echoClient.Install (csmaNodes.Get(1));
+  clientApps1.Start (Seconds(3.0));
+  clientApps1.Stop (Seconds(10.0));
+
+  Ipv4GlobalRoutingHelper::PopulateRoutingTables ();	//route
 
   //pointToPoint.EnablePcapAll ("second");
   //csma.EnablePcap ("second", csmaDevices.Get (1), true);

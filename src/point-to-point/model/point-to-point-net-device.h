@@ -190,6 +190,13 @@ public:
   virtual void SetPromiscReceiveCallback (PromiscReceiveCallback cb);
   virtual bool SupportsSendFrom (void) const;
 
+  void SetSwitchFlag(bool flag) {
+  	m_switchFlag = flag;
+  }
+  bool GetSwitchFlag(void) {
+  	return m_switchFlag;
+  }
+
 protected:
   /**
    * \brief Handler for MPI receive event
@@ -201,6 +208,9 @@ protected:
   virtual void DoInitialize (void);
 
 private:
+
+  // dj added
+  bool m_switchFlag;
 
   /**
    * \brief Assign operator

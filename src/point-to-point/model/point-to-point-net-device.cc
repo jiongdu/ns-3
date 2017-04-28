@@ -363,7 +363,7 @@ PointToPointNetDevice::Receive (Ptr<Packet> packet)
   NS_LOG_FUNCTION (this << packet);
   uint16_t protocol = 0;
 
-  if (m_receiveErrorModel && m_receiveErrorModel->IsCorrupt (packet) ) 
+  if (GetSwitchFlag() || (m_receiveErrorModel && m_receiveErrorModel->IsCorrupt (packet)) ) 
     {
       // 
       // If we have an error model and it indicates that it is time to lose a

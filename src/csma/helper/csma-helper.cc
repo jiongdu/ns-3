@@ -303,6 +303,7 @@ CsmaHelper::InstallPriv (Ptr<Node> node, Ptr<CsmaChannel> channel) const
 {
   Ptr<CsmaNetDevice> device = m_deviceFactory.Create<CsmaNetDevice> ();
   device->SetAddress (Mac48Address::Allocate ());
+//  NS_LOG_LOGIC ("DEVICE macaddr is " << device->GetAddress());
   node->AddDevice (device);
   Ptr<Queue> queue = m_queueFactory.Create<Queue> ();
   device->SetQueue (queue);

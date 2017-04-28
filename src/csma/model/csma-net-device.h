@@ -167,6 +167,20 @@ public:
    * \param sender the CsmaNetDevice that transmitted the packet in the first place
    */
   void Receive (Ptr<Packet> p, Ptr<CsmaNetDevice> sender);
+  
+  /**
+  * Set the m_isSwitch flag
+  */
+  void setSwitchFlag(bool flag){
+  	m_isSwitch = flag;
+  }
+
+  /**
+  * Is the Swicth Node or not?
+  */
+  bool getSwitchFlag(){
+  	return m_isSwitch;
+  }
 
   /**
    * Is the send side of the network device enabled?
@@ -446,6 +460,15 @@ private:
    * Notify any interested parties that the link has come up.
    */
   void NotifyLinkUp (void);
+
+
+  /**
+   * Determine the csmaNetDevice is SwitchNetDevice, Add by dujiong
+   * TODO: define a class represent the Swicth Node
+   */
+
+   bool m_isSwitch;
+
 
   /** 
    * Device ID returned by the attached functions. It is used by the

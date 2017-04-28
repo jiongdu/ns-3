@@ -52,7 +52,7 @@ main (int argc, char *argv[])
   UdpEchoServerHelper echoServer (9);
 
   ApplicationContainer serverApps = echoServer.Install (nodes.Get (1));
-  serverApps.Start (Seconds (1.0));
+  serverApps.Start (Seconds (5.0));
   serverApps.Stop (Seconds (10.0));
 
   UdpEchoClientHelper echoClient (interfaces.GetAddress (1), 9);
@@ -63,10 +63,6 @@ main (int argc, char *argv[])
   ApplicationContainer clientApps = echoClient.Install (nodes.Get (0));
   clientApps.Start (Seconds (2.0));
   clientApps.Stop (Seconds (10.0));
-
-//  AsciiTraceHelper ascii;
-//  pointToPoint.EnableAsciiAll(ascii.CreateFileStream("first.tr"));  
-  pointToPoint.EnablePcapAll("first");
 
   Simulator::Run ();
   Simulator::Destroy ();

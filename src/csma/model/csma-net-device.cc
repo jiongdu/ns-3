@@ -184,7 +184,7 @@ CsmaNetDevice::GetTypeId (void)
 }
 
 CsmaNetDevice::CsmaNetDevice ()
-  : m_linkUp (false)
+ : m_isSwitch(false), m_linkUp (false)  //add m_isSwitch default value
 {
   NS_LOG_FUNCTION (this);
   m_txMachineState = READY;
@@ -740,11 +740,19 @@ CsmaNetDevice::Receive (Ptr<Packet> packet, Ptr<CsmaNetDevice> senderDevice)
       return;
     }
 
-  EthernetHeader header (false);
+  EthernetHeader header (false);	//get EthernetHeader of Packet
   packet->RemoveHeader (header);
 
   NS_LOG_LOGIC ("Pkt source is " << header.GetSource ());
   NS_LOG_LOGIC ("Pkt destination is " << header.GetDestination ());
+
+  // If the csmaNetDevice is switch, we drop the packet, add by dujiong
+  if (getSwitchFlag()){
+  	NS_LOG_INFO ("the specified src macaddr " << header.GetSource() << ", drop!");
+	NS_LOG_INFO ("dst addr " << header.GetDestination());
+    m_phyRxDropTrace (packet);
+	return;
+  }
 
   uint16_t protocol;
   //
