@@ -171,14 +171,14 @@ public:
   /**
   * Set the m_isSwitch flag
   */
-  void setSwitchFlag(bool flag){
+  void SetSwitchFlag(bool flag){
   	m_isSwitch = flag;
   }
 
   /**
   * Is the Swicth Node or not?
   */
-  bool getSwitchFlag(){
+  bool GetSwitchFlag(){
   	return m_isSwitch;
   }
 

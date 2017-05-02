@@ -747,7 +747,7 @@ CsmaNetDevice::Receive (Ptr<Packet> packet, Ptr<CsmaNetDevice> senderDevice)
   NS_LOG_LOGIC ("Pkt destination is " << header.GetDestination ());
 
   // If the csmaNetDevice is switch, we drop the packet, add by dujiong
-  if (getSwitchFlag()){
+  if (GetSwitchFlag()){
   	NS_LOG_INFO ("the specified src macaddr " << header.GetSource() << ", drop!");
 	NS_LOG_INFO ("dst addr " << header.GetDestination());
     m_phyRxDropTrace (packet);
